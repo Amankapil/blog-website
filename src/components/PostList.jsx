@@ -7,7 +7,7 @@ const PostList = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/posts")
+      .get("https://blog-backend-esf2.onrender.com/posts")
       .then((response) => setPosts(response.data))
       .catch((error) => console.error("Error fetching posts:", error));
   }, []);
@@ -18,7 +18,9 @@ const PostList = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       setIsDeleting(true);
       try {
-        await axios.delete(`http://localhost:5000/posts/${postId}`);
+        await axios.delete(
+          `https://blog-backend-esf2.onrender.com/posts/${postId}`
+        );
         // Remove the deleted post from the posts array
         setPosts(posts.filter((post) => post._id !== postId));
       } catch (error) {
@@ -33,8 +35,9 @@ const PostList = () => {
   const [currentPost, setCurrentPost] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const handleEditClick = (post) => {
+  const handleEditClick = (post) => { 
     setCurrentPost(post);
     setEditedTitle(post.title);
     setEditedContent(post.content);
@@ -43,10 +46,13 @@ const PostList = () => {
 
   const handleSaveChanges = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/posts/${currentPost._id}`, {
-        title: editedTitle,
-        content: editedContent,
-      });
+      await axios.put(
+        `https://blog-backend-esf2.onrender.com/posts/${currentPost._id}`,
+        {
+          title: editedTitle,
+          content: editedContent,
+        }
+      );
       const updatedPosts = posts.map((post) =>
         post._id === currentPost._id
           ? { ...post, title: editedTitle, content: editedContent }
@@ -54,15 +60,18 @@ const PostList = () => {
       );
       setPosts(updatedPosts);
       setIsEditing(false);
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), 3000);
     } catch (error) {
       console.error("Error updating post:", error);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <h2 className="text-[40px] font-bold">Posts</h2>
-      {/* <ul className="flex flex-wrap gap-10 my-20 justify-start">
+    <>
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-[40px] font-bold max-md:text-center">Posts</h2>
+        {/* <ul className="flex flex-wrap gap-10 my-20 justify-start">
         {posts.map((post) => (
           <li
             className="shadow-lg p-5 w-[300px] rounded-lg bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white"
@@ -75,79 +84,94 @@ const PostList = () => {
           </li>
         ))}
       </ul> */}
-      <ul className="flex flex-wrap gap-10 my-20 justify-start">
-        {posts.map((post) => (
-          <li
-            key={post._id}
-            className="relative shadow-lg p-5 w-[300px] rounded-lg bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white"
-          >
-            <Link to={`/posts/${post._id}`}>
-              <h3 className="text-[20px] font-bold mb-3">{post.title}</h3>
-              <p>{post.content.substring(0, 100)}...</p>
-            </Link>
-            <div className="mt-4 flex justify-between items-center">
-              <button
-                onClick={() => handleEditClick(post, post._id)}
-                className="text-blue-400 hover:text-blue-500 underline"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(post._id)}
-                disabled={isDeleting}
-                className="text-red-400 hover:text-red-500 underline"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+        <ul className="flex flex-wrap gap-10 my-20 justify-start max-md:justify-center">
+          {posts.map((post) => (
+            <li
+              key={post._id}
+              className="relative flex flex-col justify-between shadow-lg p-5 w-[300px] rounded-lg bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white"
+            >
+              <Link to={`/posts/${post._id}`}>
+                <h3 className="text-[20px] font-bold mb-3">{post.title}</h3>
+                <p>{post.content.substring(0, 100)}...</p>
+              </Link>
+              <div className="mt-4 flex justify-between items-center">
+                <button
+                  onClick={() => handleEditClick(post, post._id)}
+                  className="text-blue-400 hover:text-blue-500 underline"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(post._id)}
+                  disabled={isDeleting}
+                  className="text-red-400 hover:text-red-500 underline"
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
 
-      {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[400px]">
-            <h3 className="text-xl font-bold mb-4">Edit Post</h3>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
+        {isEditing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-[400px]">
+              <h3 className="text-xl font-bold mb-4">Edit Post</h3>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Content
+                </label>
+                <textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-32"
+                ></textarea>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  // onClick={() => handleSaveChanges(id)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                  Save Changes
+                </button>
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Content
-              </label>
-              <textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-32"
-              ></textarea>
-            </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveChanges}
-                // onClick={() => handleSaveChanges(id)}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              >
-                Save Changes
-              </button>
-            </div>
+          </div>
+        )}
+      </div>
+
+      {showSuccessModal && (
+        <div
+          className="fixed top-40 right-4 w[500px] z-50 max-w-xs bg-[#15ff21] text-white p-4 rounded-lg shadow-lg transform transition-transform duration-500 ease-in-out translate-x-full"
+          style={{
+            transform: showSuccessModal ? "translateX(0)" : "translateX(130%)",
+          }}
+        >
+          <div className="flex justify-between items-center">
+            <span>Blog Updated successfully!</span>
+            <button className="ml-4 text-xl">&times;</button>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

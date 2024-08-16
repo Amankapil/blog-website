@@ -8,7 +8,7 @@ const PostDetail = ({ match }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/posts/${id}`)
+      .get(`https://blog-backend-esf2.onrender.com/posts/${id}`)
       .then((response) => setPost(response.data))
       .catch((error) => console.error("Error fetching post:", error));
   }, [id]);
@@ -16,7 +16,7 @@ const PostDetail = ({ match }) => {
   if (!post) return <p>Loading...</p>;
 
   return (
-    <div className=" max-w-5xl mx-auto">
+    <div className=" max-w-5xl mx-auto max-md:p-3">
       <h2 className="py-5 font-bold text-[30px]">{post.title}</h2>
       <p className="text-[16px] font-semibold">{post.content}</p>
       <p className="text-[14px] font-bold py-20">
